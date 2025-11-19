@@ -1,0 +1,7 @@
+Type: Admin
+Username: Iffat313 
+Password: WSU313!
+
+Type: User
+Username: Zack123
+Password: MCompetition123!

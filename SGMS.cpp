@@ -1,6 +1,7 @@
-#include <iostream>
-#include <fstream>
-
+#include <iostream> //for basic I/O
+#include <fstream> //for basic/fundemtnal (MUST) of creating, writing, reading files. 
+#include <sstream> //for istringstream object  to use iss(value) method from said object to read a specific word from a line within in a fil. This relies on getline(x,y) so it can break the word down within the line.
+#include <vector>
 using namespace std;
 
 //global variables
@@ -10,7 +11,7 @@ string Password;
 string UserInput;
 char AccessGranted;
 
-void LogIn();
+string LogIn();
 
 class Admin{
     float ClassAverageGPA(); //returns the class average GPA via int
@@ -30,16 +31,36 @@ class Student{
 };
 
 int main(){
-    cout << "Welcome, would you like to log in {Y/N}?";
+    cout << "Welcome, would you like to log in {Y/N}? ";
     cin >> AccessGranted;
 
-    if(AccessGranted == 'Y'){
-        LogIn();
-    }
+    cout << "Username: ";
+    cin >> Username;
+    cout << "\n";
+    cout << "Password: ";
+    cin >> Password;  
 
-    do{
-        cout << "1. Logout";
-        cout << "2. Add a Student Record";
+    string UserType = LogIn();
+        if(UserType == "Student"){
+            Student StudentObject;
+            cout << "You are a student. Welcome back user " + Username; 
+        }
+        else if(UserType == "Admin"){
+            Admin AdminObject;
+            cout << "You are a Admin. Welcome back user " + Username; 
+        }
+        else{
+            cout << "User doesn't exsist or account creds are incorrect \n";
+            main();
+        }
+
+
+
+    do{ //for admin
+        cout << "1. Logout \n";
+        cout << "2. Add a Student Record \n";
+        cin >> UserInput;
+
 
         if(UserInput == "LogOut"){
             main();
@@ -48,28 +69,41 @@ int main(){
             
         }
         
-    }while(AccessGranted!='N');
+    }while((AccessGranted!='N') && (UserType == "Admin"));
 }
 
-void LogIn(){
 
-    cout << "Username: ";
-    cin >> Username;
-    cout << "\n";
-    cout << "Password: ";
-    cin >> Password;  
 
+
+string LogIn(){
     //local variable use and everytime this method everything happens again cincluding re-declaring the obkect from ifstream
-    string Text;
+    string Text; //LV 1
+    vector<string>Words;
 
-    ifstream File("UserCreds.txt");
 
-    while(getline(File, Text)){
-        if(Text == Username){
-            "user exsists!";
+    ifstream File("UserCreds.txt"); // read from the text file , ifstream is an object from ftream library to read from the text file
+
+    while(getline(File, Text)){ //as we traverse through the while loop, Text will read/intialized by every char from the file until it see's a new line, thus reading the file line by line in each iteration. Thus, 1st iteration is the 1st line  stored in text so and so foruth
+
+        istringstream iss(Text); //istringstream is an object from sstream lib and iss is a method that breaks down Text into words,
+        string WordFromLine; //Create a variable of type string which will be used to store each word from the current line of the current iteration
+
+        while(iss >> WordFromLine){ //Niw that 
+            Words.push_back(WordFromLine);
         }
     }
 
+    for(int i = 0; i<Words.size(); i++){
+        if(Words[i] == Username){
+           continue;
+        }
+        if(Words[i] == Password){
+            i = i - 4;
+            return Words[i];
+        }
+        
+    }
 
+    return "bad";
 
 }

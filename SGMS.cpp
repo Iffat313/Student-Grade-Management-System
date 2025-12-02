@@ -1,7 +1,8 @@
 #include <iostream> //for basic I/O
 #include <fstream> //for basic/fundemtnal (MUST) of creating, writing, and reading files. 
 #include <sstream> //for istringstream object  to use iss(value) method from said object to read a specific word from a line within in a fil. This relies on getline(x,y) so it can break the word down within the line.
-#include <vector>
+#include <vector> //to use vectors
+#include <string> //so I can use certain built in methods for strings like getting the size
 using namespace std;
 
 //global variables
@@ -15,15 +16,15 @@ string LogIn();
 
 class Admin{
     public: //access specifier
-        float ClassAverageGPA(); //returns the class average GPA via float. So we must consider every student.
-        void LowestGPA(); //returns the lowest GPA in the class via float. Calculate the GPA for every student and return the GPA of student who has the Lowest
+        float ClassAverageGPA(); //returns the class average GPA via float. So we must consider every student. Also used to display a summary stat 
+        void LowestGPA(); //returns the lowest GPA in the class via float. Calculate the GPA for every student and return the GPA of student who has the Lowest. Also used to display summary stat method
         void HighestGPA(); //returns the highest GPA in the class via float. Calculate the GPA for every student 
         /*
         - GPA = Sum of the grade(s)/number of grades
         */
         void GradeDistribution(); //displays students who got A, B, etc
-        void SortByName();
-        void SortByGrade();
+        void SortByName(); //Display summary stat method, specifically by students name in alphabetical order
+        void SortByGrade(); //Display summary stat method, specifically bt students name via their grade from highest to lowest 
         void Modify(string Value);
         void LoadStudentRecord(); //loads student record from file and uploads it to terminal in the form of student ID, name, Grade N
         void AddStudentRecord(); //allows admin to enter a students data into a plain text file, creates a student record
@@ -80,6 +81,7 @@ int main(){
         cout << "5. Retrieve the lowest GPA in the class \n";
         cout << "6. Retrieve Student Record \n";
         cout << "7. Retrieve Grade Distribution \n";
+        cout << "8. Sort Student by Names \n";
         cout << "Enter: ";
         cin >> UserInput;
 
@@ -109,6 +111,10 @@ int main(){
 
         else if(UserInput == 7){
             AdminObject.GradeDistribution();
+        }
+
+        else if(UserInput == 8){
+            AdminObject.SortByName();
         }
         
     }while((AccessGranted!='N') && (UserType == "Admin"));
@@ -190,6 +196,7 @@ void Admin::AddStudentRecord(){
 
 }
 
+
 float Admin::ClassAverageGPA(){
 
     float Avg = 0;
@@ -268,9 +275,8 @@ void Admin::HighestGPA(){
 
     Highest = GradesFromFile[0];
     for(int i = 0; i<GradesFromFile.size(); i++){
-        //cout << GradesFromFile[i] << "\n";
         if(Highest<GradesFromFile[i]){
-            Highest == GradesFromFile[i];
+            Highest = GradesFromFile[i];
         }
     }
 
@@ -321,7 +327,7 @@ void Admin::LowestGPA(){
     Lowest = GradesFromFile[0];
     for(int i = 0; i<GradesFromFile.size(); i++){
         if(Lowest>GradesFromFile[i]){
-            Lowest == GradesFromFile[i];
+            Lowest = GradesFromFile[i];
         }
     }
 
@@ -431,6 +437,53 @@ void Admin::GradeDistribution(){
    cout << "The number of people that got a F: " << GD[8] << "\n";    
 }
 
+
+void Admin::SortByName(){
+    string Text;
+    string WordFromLine; //this will be the student name, with the way we will traverse in the file via the outer while loop
+    int LineNumber = 0;
+    int Four = 4;
+    vector<string>NamesFromFile;
+
+    ifstream File("StudentData.txt");
+
+    while(getline(File, Text)){
+
+        LineNumber++;
+
+        int Total = LineNumber + Four;
+        if((Total%2!=0) || (Text == " ")){
+            continue; //hitting this will cause us to go back to the while loop and ultimately the beginning of the def of it if the condition is true
+        }
+        
+        istringstream iss(Text);
+        while(iss >> WordFromLine){
+            //cout << WordFromLine << "\n";
+            NamesFromFile.push_back(WordFromLine);
+        }
+
+    }
+
+    for(int i = 0; i<NamesFromFile.size(); i++){
+        size_t NameLength = NamesFromFile[i].length();
+        for(int j = 0; j<NamesFromFile.size()-1; j++){ //this 1st nested for loop is what causes us to always look at the first element within the vector when comparing it to other elements in the vector
+            for(int z = 0; z<NameLength; z++){  //thsi 2nd nested for loop is needed to compare x character of the current string to the x character of the next string via the second outer for loop
+                if(NamesFromFile[j][z]<NamesFromFile[j+1][z]){
+                    string temp = NamesFromFile[j];
+                    NamesFromFile[j] = NamesFromFile[j+1];
+                    NamesFromFile[j+1] = temp;
+                }
+            }
+        }
+    }
+
+    for(int k = 0; k<NamesFromFile.size(); k++){
+        cout << NamesFromFile[k] << "\n";
+    }
+
+} //25, 10, 3, 30, 2, 5
+//
+
 /*
 - If you attempt to read from a file that doesnt exsist there wont be an error but rather the program wont be able to print anything onto the output as there is nothing to read
 
@@ -459,5 +512,5 @@ but it will also forget the previous value it once stored
 - Within the methods that we define for our classes, when declaring the variables of numerical data types (int & float), we must intialize them to 0 expliclity 
 otherwise we risk having garbage values that may potitentally risk in messing up the algorithim in determining the average. 
 
-
+- size_t $YOUR_OBJECT_NAME_FOR_CLASS_size_t; no passed value for parameter thus we do not call paramtraized constructor
 */

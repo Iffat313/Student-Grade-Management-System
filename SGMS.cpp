@@ -9,7 +9,7 @@ using namespace std;
 
 string Username;
 string Password;
-int UserInput;
+int UserInput; 
 char AccessGranted;
 
 string LogIn();
@@ -81,7 +81,8 @@ int main(){
         cout << "5. Retrieve the lowest GPA in the class \n";
         cout << "6. Retrieve Student Record \n";
         cout << "7. Retrieve Grade Distribution \n";
-        cout << "8. Sort Student by Names \n";
+        cout << "8. Sort Students by Names \n";
+        cout << "9. Sort Students by Grades \n";
         cout << "Enter: ";
         cin >> UserInput;
 
@@ -115,6 +116,10 @@ int main(){
 
         else if(UserInput == 8){
             AdminObject.SortByName();
+        }
+
+        else if(UserInput == 9){
+            AdminObject.SortByGrade();
         }
         
     }while((AccessGranted!='N') && (UserType == "Admin"));
@@ -264,6 +269,7 @@ void Admin::HighestGPA(){
             Proceed = 1;
         }
         if(Proceed){
+            //cout << GPA << "\n";
             GPA =  PlaceHolder/Counter;
             GradesFromFile.push_back(GPA);
             PlaceHolder = 0;
@@ -282,7 +288,7 @@ void Admin::HighestGPA(){
 
     File.close();
 
-    cout << "The highest class average is: " << Highest << "\n";
+    cout << "The highest GPA in the class is: " << Highest << "\n";
 }
 
 void Admin::LowestGPA(){
@@ -464,24 +470,124 @@ void Admin::SortByName(){
 
     }
 
-    for(int i = 0; i<NamesFromFile.size(); i++){
-        size_t NameLength = NamesFromFile[i].length();
+    for(int i = 0; i<NamesFromFile.size(); i++){//this outer for loop represent the number of times we do a "process". We do a "process" based on the number of elements there are in the vector.
+        //size_t NameLength = NamesFromFile[i].length(); //get the length of current student name (string) from the vector
         for(int j = 0; j<NamesFromFile.size()-1; j++){ //this 1st nested for loop is what causes us to always look at the first element within the vector when comparing it to other elements in the vector
-            for(int z = 0; z<NameLength; z++){  //thsi 2nd nested for loop is needed to compare x character of the current string to the x character of the next string via the second outer for loop
-                if(NamesFromFile[j][z]<NamesFromFile[j+1][z]){
+            size_t NameLength = min(NamesFromFile[j].length(), NamesFromFile[j+1].length()); 
+            /*
+            - In order to alphabetically sort the student names from the file we need to get the student name length or the number of characters from the string
+            - This is so we know how many letters we need to compare from the current string to the neighboring string. 
+            - But we will get the minimum number of the length between the two strings, this is becuase both strings may not be of the same length and we should only compare what exsists! no useless work
+            if the smaller string is essetially a substring in the bigger string when comparing, the bigger string will be first.
+            - Lastly, notice how we get the minimum length between the two strings in the inner/process loop. 
+            This is so we don't go out of bounds (a value that doesnt exsist) when getting the index for the neighbooring string, the iterator
+            in the inner loop can only go to the second to last index of the vector, we can take adavantage of this and safely get the neighboring 
+            string (j+1) without going out of bounds.
+            */
+            for(int z = 0; z<NameLength; z++){  //this 2nd nested for loop is needed to compare x character of the current string to the x character of the next string at x character via the second outer for loop
+                if(NamesFromFile[j][z]>NamesFromFile[j+1][z]){ //THIS IF STATEMENT GENUIALLY DOES THE SORTING PROCESS STATED ABOVE FOR THE 2ND NEST FOR LOOP
                     string temp = NamesFromFile[j];
                     NamesFromFile[j] = NamesFromFile[j+1];
                     NamesFromFile[j+1] = temp;
+                    break; //we will go the 1st inner loop and leave the 2nd inner loop, moving to the next string as we have just sorted two strings alphabetically.
+                }
+                else if(NamesFromFile[j] == NamesFromFile[j+1].substr(0, NamesFromFile[i].length())){//THIS ELSE IF STATEMENT HANDLES THE SCANIRO WHERE THE CURRENT STRING IS A SUBSTRING IN THE NEIGHBOR STRING EX: Iffat, Iffatt
+                    string temp = NamesFromFile[j];
+                    NamesFromFile[j] = NamesFromFile[j+1];
+                    NamesFromFile[j+1] = temp;
+                    break; //we will go the 1st inner loop and leave the 2nd inner loop, moving to the next string as we have just sorted two strings alphabetically.
+                }
+                else if(NamesFromFile[j][z] == NamesFromFile[j+1][z]){//ELSE IF PURPOSE RIGHT BELOW:
+                    continue; //the current character of the current string an the neighbor string are the same, we cant sort, so we move on to the next chars of the current string and current neighbor string
+                }
+                else{
+                    break;
                 }
             }
+                
         }
     }
 
     for(int k = 0; k<NamesFromFile.size(); k++){
         cout << NamesFromFile[k] << "\n";
+    } 
+
+} 
+
+void Admin::SortByGrade(){
+    int NumberFromLine = 0;
+    int CurrentLine = 1;
+    float PlaceHolder = 0;
+    float Counter = 0;
+    float GPA = 0;
+    bool Proceed = 0;
+    int MAX = 0;
+    string Text;
+    vector<float>GradesFromFile;
+    vector<string>NamesFromFile;
+
+
+    ifstream File("StudentData.txt");
+
+    while(getline(File, Text)){
+
+        //get the words from each line, specifically the student name and upload it to the respective vector;
+        if((CurrentLine%2==0)&&(Text!="")){
+            NamesFromFile.push_back(Text);
+        }
+        CurrentLine++;
+
+        //first remove the the commas between the grades if any for each student
+        for(char &c: Text){
+            if(c == ','){
+                c = ' ';
+            }
+        }
+
+        //get the numbers from each line in the nested while loop. In the def of the nested while loop, make sure to upload the GPA of each student to the respective vector
+        istringstream iss(Text);
+        while(iss >> NumberFromLine){
+            PlaceHolder = PlaceHolder + NumberFromLine;
+            Counter++;
+            Proceed = 1;
+        }
+        if(Proceed == 1){
+            GPA = PlaceHolder/Counter;
+            //cout << GPA << "\n";
+            GradesFromFile.push_back(GPA);
+            PlaceHolder = 0;
+            Counter = 0;
+            Proceed = 0;
+            GPA = 0;
+        }
     }
 
-} //25, 10, 3, 30, 2, 5
+    //keep in mind that number of names should be equivalent to the number of GPA's as each student has their own GPA
+    
+    
+    if(NamesFromFile.size() == GradesFromFile.size()){
+        MAX = NamesFromFile.size();
+    }
+    //SORT
+    for(int i = 0; i<MAX; i++){
+        for(int j = 0; j<MAX-1; j++){
+            if(GradesFromFile[j]<GradesFromFile[j+1]){
+                //swap the grades
+                float TempGrade = GradesFromFile[j];
+                GradesFromFile[j] = GradesFromFile[j+1];
+                GradesFromFile[j+1] = TempGrade;
+                //reflect the change on to the respective student name;
+                string TempStudentName = NamesFromFile[j];
+                NamesFromFile[j] = NamesFromFile[j+1];
+                NamesFromFile[j+1] = NamesFromFile[j];
+            }
+        }
+    }
+
+    for(int z = 0; z<MAX; z++){
+        cout << "Student Name: "<< NamesFromFile[z] << " GPA: " << GradesFromFile[z] << "\n";
+    }
+}
 //
 
 /*
@@ -501,8 +607,14 @@ ifstream $YOUR_OBJECT_NAME_FOR_CLASS_ifstream("$FILENAME.TXT");
 - istringstream is a a class from the library sstream. We can use the class to break down every word when we read the current line, from the current iteration of the while loop. from a file via the object of the class
 istringstram  $YOUR_OBJECT_NAME_FOR_CLASS_istringstream("$VARIABLE_OF_TYPE_STRING")
 
-while($YOUR_OBJECT_NAME_FOR_CLASS_istringstream << $VARAIBELE_OF_NUMERICTYPE){ //this while loop will end once there is a word that is read or there is no remainig words within a line 
+while($YOUR_OBJECT_NAME_FOR_CLASS_istringstream << $VARAIBELE_OF_NUMERICTYPE){ //this while loop will end once there is a word that is read or there is no remainig words within a line. The variable of type numeric stores the current number from the current line were on 
     def..
+    //we can store the numbers from the words we read from the current line
+}
+
+while($YOUR_OBJECT_NAME_FOR_CLASS_istringstream << $VARAIBELE_OF_STRINGTYPE){ //this while loop will end once there is a word that is read or there is no remainig words within a line 
+    def..
+    //we can store the words from the current line were reading 
 }
 
 - local variables  are only viewable and accessible within the scope they are declared and intialized.
@@ -513,4 +625,7 @@ but it will also forget the previous value it once stored
 otherwise we risk having garbage values that may potitentally risk in messing up the algorithim in determining the average. 
 
 - size_t $YOUR_OBJECT_NAME_FOR_CLASS_size_t; no passed value for parameter thus we do not call paramtraized constructor
+
+- continue leaves the current iteration of the loop to the next iteration of said loop
+- break compleletely leaves the loop 
 */

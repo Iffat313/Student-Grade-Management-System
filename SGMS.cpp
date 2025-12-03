@@ -88,6 +88,7 @@ int main(){
 
 
         if(UserInput == 1){
+            cout << "You will be redirected to the main login CLI now, goodbye \n";
             main();
         }
         else if(UserInput == 2){
@@ -563,8 +564,6 @@ void Admin::SortByGrade(){
     }
 
     //keep in mind that number of names should be equivalent to the number of GPA's as each student has their own GPA
-    
-    
     if(NamesFromFile.size() == GradesFromFile.size()){
         MAX = NamesFromFile.size();
     }
@@ -579,7 +578,7 @@ void Admin::SortByGrade(){
                 //reflect the change on to the respective student name;
                 string TempStudentName = NamesFromFile[j];
                 NamesFromFile[j] = NamesFromFile[j+1];
-                NamesFromFile[j+1] = NamesFromFile[j];
+                NamesFromFile[j+1] = TempStudentName;
             }
         }
     }

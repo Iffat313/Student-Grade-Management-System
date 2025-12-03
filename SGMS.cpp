@@ -5,14 +5,14 @@
 #include <string> //so I can use certain built in methods for strings like getting the size
 using namespace std;
 
-//global variables
+//global variables & methods
 
-string Username;
+string Username; //NOTE: The Username for Students == The StudentID for Students. for users of type Student, make sure there is NOT a duplicate in both Username and StudentID. Admins are added manually on the text file so no worries.
 string Password;
 int UserInput; 
 char AccessGranted;
 
-
+void Append(); //Inorder to register new students, we must add them into our databases (the two .txt files, the for the student info database by default the grades will be zero)
 string LogIn();
 
 class Admin{
@@ -43,9 +43,17 @@ int main(){
 
     Admin AdminObject; //creates an instance of the Admin class as the user is a Admin
     Student StudentObject; //creates an instance of the Student class as the user is a student
+    
+    cout << "Hello! Are you a new Student {Y/N}?: ";
+    cin >> AccessGranted;
 
+    if(AccessGranted == 'Y'){
+        Append();
+    }
 
-    cout << "Welcome, would you like to log in {Y/N}? ";
+    
+
+    cout << "Welcome, would you like to log in {Y/N}?: ";
     cin >> AccessGranted;
 
     if(AccessGranted == 'N'){
@@ -60,12 +68,37 @@ int main(){
     string UserType = LogIn();
         if(UserType == "Student"){
             cout << "You are a student. Welcome back user " + Username + "\n"; 
+
+            do{ //for Student
+                cout << "1. Logout \n";
+                cout << "2. My GPA \n";
+                cout << "3. My Grades \n";
+                cout << "Enter: ";
+                cin >> UserInput;
+
+                if(UserInput == 1){
+                    main();
+                    break;
+                }
+
+                else if(UserInput == 2){
+                    //
+                }
+
+                else if(UserInput == 3){
+                    //
+                }
+
+                else{
+                    cout << "Bad input, you must do an actual input from the list \n";
+                }
+            }while ((AccessGranted!='N') && (UserType == "Student")); 
         }
 
         else if(UserType == "Admin"){
             cout << "You are a Admin. Welcome back user " + Username + "\n";
 
-            do{ //for admin
+            do{ //for Admin
                 cout << "1. Logout \n";
                 cout << "2. Add a Student Record \n";
                 cout << "3. Retrieve The Class Average \n";
@@ -81,7 +114,8 @@ int main(){
 
                 if(UserInput == 1){
                     cout << "You will be redirected to the main login CLI now, goodbye \n";
-                    main();
+                    main(); //calls the main method, recursive. Thus, the main method will start from the top all over again. 
+                    break; //If we truly want to start all we need to make sure we leave this while loop so the def of it doesnt appear again. 
                 }
                 else if(UserInput == 2){
                     AdminObject.AddStudentRecord();
@@ -114,80 +148,48 @@ int main(){
                 else if(UserInput == 9){
                     AdminObject.SortByGrade();
                 }
+                
+                else{
+                    cout << "Bad input, you must enter an appropirate number \n";
+                }
         
             }while((AccessGranted!='N') && (UserType == "Admin"));
-
         }
 
         else{
             cout << "User doesn't exsist or account creds are incorrect \n";
             main();
         }
-    
-    /*
-    - 
-    */
+}
 
-    //Admin AdminObject; //creates an instance of the Admin class as the user is a Admin
-    //Student StudentObject; //creates an instance of the Student class as the user is a student
+void Append(){ //you will be writing to two files in this method so use ofstream
+    string Text;
+    string UN; //local Username of type string, we've already declared a gloabal var so dup is not allowed. Remember, for user Student, Username == ID
+    string PW; //same as UN
+    string StudentName; //we can re-use StudentName as it's a local varaible
 
-    /*
+    cout << "Enter your name: ";
+    cin >> StudentName;
+    cout << "Enter your Username, this will also be your Student ID (WSU FORMATE: xy####): ";
+    cin >> UN;
+    cout << "Enter your Password: ";
+    cin >> PW;
 
-    do{ //for admin
-        cout << "1. Logout \n";
-        cout << "2. Add a Student Record \n";
-        cout << "3. Retrieve The Class Average \n";
-        cout << "4. Retrieve the highest GPA in the class \n";
-        cout << "5. Retrieve the lowest GPA in the class \n";
-        cout << "6. Retrieve Student Record \n";
-        cout << "7. Retrieve Grade Distribution \n";
-        cout << "8. Sort Students by Names \n";
-        cout << "9. Sort Students by Grades \n";
-        cout << "Enter: ";
-        cin >> UserInput;
+    ofstream FileObject("UserCreds.txt", ios::app); //Add the user Student to the File/database that contains user creds
 
+    FileObject << "\n";
+    FileObject << "\n";
+    FileObject << "Type: Student" << "\n";
+    FileObject << "Username: " << UN << "\n";
+    FileObject << "Password: " << PW << "\n";
 
-        if(UserInput == 1){
-            cout << "You will be redirected to the main login CLI now, goodbye \n";
-            main();
-        }
-        else if(UserInput == 2){
-            AdminObject.AddStudentRecord();
-        }
+    FileObject.close();
 
-        else if(UserInput == 3){
-            cout << "The class average is: " << AdminObject.ClassAverageGPA() << "\n";
-        }
+    ofstream FileObject2("StudentData.txt", ios::app); //Add the user Student to the file/database that contains information about the Student like their ID, etc
 
-        else if(UserInput == 4){
-            AdminObject.HighestGPA();
-        }
-
-        else if(UserInput == 5){
-            AdminObject.LowestGPA();
-        }
-
-        else if(UserInput == 6){
-            AdminObject.LoadStudentRecord();
-        }
-
-        else if(UserInput == 7){
-            AdminObject.GradeDistribution();
-        }
-
-        else if(UserInput == 8){
-            AdminObject.SortByName();
-        }
-
-        else if(UserInput == 9){
-            AdminObject.SortByGrade();
-        }
-        
-    }while((AccessGranted!='N') && (UserType == "Admin"));
-
-    */
-
-
+    FileObject2 << UN << "\n";
+    FileObject2 << StudentName << "\n"; 
+    FileObject2 << 0 << "\n";
 
 }
 

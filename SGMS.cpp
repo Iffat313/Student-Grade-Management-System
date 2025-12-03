@@ -12,6 +12,7 @@ string Password;
 int UserInput; 
 char AccessGranted;
 
+
 string LogIn();
 
 class Admin{
@@ -40,6 +41,10 @@ class Student{
 
 int main(){
 
+    Admin AdminObject; //creates an instance of the Admin class as the user is a Admin
+    Student StudentObject; //creates an instance of the Student class as the user is a student
+
+
     cout << "Welcome, would you like to log in {Y/N}? ";
     cin >> AccessGranted;
 
@@ -56,9 +61,64 @@ int main(){
         if(UserType == "Student"){
             cout << "You are a student. Welcome back user " + Username + "\n"; 
         }
+
         else if(UserType == "Admin"){
-            cout << "You are a Admin. Welcome back user " + Username + "\n"; 
+            cout << "You are a Admin. Welcome back user " + Username + "\n";
+
+            do{ //for admin
+                cout << "1. Logout \n";
+                cout << "2. Add a Student Record \n";
+                cout << "3. Retrieve The Class Average \n";
+                cout << "4. Retrieve the highest GPA in the class \n";
+                cout << "5. Retrieve the lowest GPA in the class \n";
+                cout << "6. Retrieve Student Record \n";
+                cout << "7. Retrieve Grade Distribution \n";
+                cout << "8. Sort Students by Names \n";
+                cout << "9. Sort Students by Grades \n";
+                cout << "Enter: ";
+                cin >> UserInput;
+
+
+                if(UserInput == 1){
+                    cout << "You will be redirected to the main login CLI now, goodbye \n";
+                    main();
+                }
+                else if(UserInput == 2){
+                    AdminObject.AddStudentRecord();
+                }
+
+                else if(UserInput == 3){
+                    cout << "The class average is: " << AdminObject.ClassAverageGPA() << "\n";
+                }
+
+                else if(UserInput == 4){
+                    AdminObject.HighestGPA();
+                }
+
+                else if(UserInput == 5){
+                    AdminObject.LowestGPA();
+                }
+
+                else if(UserInput == 6){
+                    AdminObject.LoadStudentRecord();
+                }
+
+                else if(UserInput == 7){
+                    AdminObject.GradeDistribution();
+                }
+
+                else if(UserInput == 8){
+                    AdminObject.SortByName();
+                }
+
+                else if(UserInput == 9){
+                    AdminObject.SortByGrade();
+                }
+        
+            }while((AccessGranted!='N') && (UserType == "Admin"));
+
         }
+
         else{
             cout << "User doesn't exsist or account creds are incorrect \n";
             main();
@@ -68,10 +128,10 @@ int main(){
     - 
     */
 
-    Admin AdminObject; //creates an instance of the Admin class as the user is a Admin
-    Student StudentObject; //creates an instance of the Student class as the user is a student
+    //Admin AdminObject; //creates an instance of the Admin class as the user is a Admin
+    //Student StudentObject; //creates an instance of the Student class as the user is a student
 
-
+    /*
 
     do{ //for admin
         cout << "1. Logout \n";
@@ -125,11 +185,17 @@ int main(){
         
     }while((AccessGranted!='N') && (UserType == "Admin"));
 
+    */
+
+
+
 }
 
 string LogIn(){
     //local variable use and everytime this method everything happens again cincluding re-declaring the obkect from ifstream
     string Text; //LV 1
+    int Pass = 0;
+    int PlaceHolder = 0;
     vector<string>Words;
 
 
@@ -147,13 +213,20 @@ string LogIn(){
 
     for(int i = 0; i<Words.size(); i++){
         if(Words[i] == Username){
+            Pass++;
            continue;
         }
         if(Words[i] == Password){
+            Pass++;
             i = i - 4;
-            return Words[i];
+            PlaceHolder = i;
+            break;
         }
         
+    }
+
+    if(Pass == 2){
+        return Words[PlaceHolder];
     }
 
     return "bad";

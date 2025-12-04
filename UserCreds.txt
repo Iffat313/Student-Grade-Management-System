@@ -6,6 +6,3 @@ Type: Student
 Username: ab1234
 Password: MCompetition123!
 
-Type: Student
-Username: uf8321
-Password: Dictionary21!

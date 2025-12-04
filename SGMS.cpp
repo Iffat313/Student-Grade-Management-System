@@ -7,7 +7,7 @@ using namespace std;
 
 //global variables & methods
 
-string Username; //NOTE: The Username for Students == The StudentID for Students. for users of type Student, make sure there is NOT a duplicate in both Username and StudentID. Admins are added manually on the text file so no worries.
+string Username; //NOTE: The Username for Students == The StudentID for user Students. for users of type Student, make sure there is NOT a duplicate in both Username and StudentID. Admins are added manually on the text file so no worries.
 string Password;
 int UserInput; 
 char AccessGranted;
@@ -15,7 +15,7 @@ char AccessGranted;
 void Append(); //Inorder to register new students, we must add them into our databases (the two .txt files, the for the student info database by default the grades will be zero)
 string LogIn();
 
-class Admin{
+class Admin{ // I will define Admin methods after int main();
     public: //access specifier
         float ClassAverageGPA(); //returns the class average GPA via float. So we must consider every student. Also used to display a summary stat 
         void LowestGPA(); //returns the lowest GPA in the class via float. Calculate the GPA for every student and return the GPA of student who has the Lowest. Also used to display summary stat method
@@ -32,26 +32,102 @@ class Admin{
         //~Admin(); //destructor
 };
 
-class Student{
+class Student{ // I will define Student methods before int main();
     public: //access specifier
         float MyGPA(); //returns currently logged in student's GPA via float
         void MyGrades(); //returns 
         //~Student(); //destructor
 };
 
+float Student::MyGPA(){ //this method will not use a vector to store the current Student's grade to find their avg
+    float GPA = 0;
+    int PlaceHolder = 0;
+    int Counter = 0;
+    string Text;
+    float NumberFromLine = 0;
+   
+    ifstream File("StudentData.txt");
+
+    while(getline(File, Text)){
+
+        istringstream iss(Text);
+        while(iss >> NumberFromLine){
+            PlaceHolder = PlaceHolder + NumberFromLine;
+            Counter++;
+        }
+    }
+    
+    GPA = PlaceHolder/Counter;
+
+    return GPA;
+    
+}
+
+void Student::MyGrades(){
+    string Text;
+    float NumberFromLine = 0;
+    int Counter = 0;
+    int Proceed = -1;
+    vector<float>GradesFromFile;
+   
+    ifstream File("StudentData.txt");
+
+    while(getline(File, Text)){
+
+        //first remove the the commas between the grades if any for each student
+        for(char &c: Text){
+            if(c == ','){
+                c = ' ';
+            }
+        }
+
+        if(Text == Username){
+            Proceed = 1;
+            continue;
+        }
+
+        if(Proceed == 1){
+            istringstream iss(Text);
+            while(iss >> NumberFromLine){
+                GradesFromFile.push_back(NumberFromLine);
+            }
+            Proceed = 0;
+        }
+
+        if(Proceed == 0){
+            break;
+        }
+    }
+
+    cout << "Your Grade(s): ";
+    for(int i = 0; i<GradesFromFile.size(); i++){
+        if(i == GradesFromFile.size()-1){
+            cout << GradesFromFile[i] << "\n";
+            break;
+        }
+        cout << GradesFromFile[i] << ", ";
+    }
+    
+}
+
+
+
 int main(){
 
     Admin AdminObject; //creates an instance of the Admin class as the user is a Admin
     Student StudentObject; //creates an instance of the Student class as the user is a student
     
-    cout << "Hello! Are you a new Student {Y/N}?: ";
-    cin >> AccessGranted;
+
+    while((AccessGranted != 'Y') && (AccessGranted!='N')){
+        cout << "Hello! Are you a new Student {Y/N}?: ";
+        cin >> AccessGranted;
+    }
+    //cout << "Hello! Are you a new Student {Y/N}?: ";
+    //cin >> AccessGranted;
 
     if(AccessGranted == 'Y'){
         Append();
     }
-
-    
 
     cout << "Welcome, would you like to log in {Y/N}?: ";
     cin >> AccessGranted;
@@ -77,16 +153,17 @@ int main(){
                 cin >> UserInput;
 
                 if(UserInput == 1){
+                    AccessGranted = ' ';
                     main();
                     break;
                 }
 
                 else if(UserInput == 2){
-                    //
+                    cout << Username << " GPA: " << StudentObject.MyGPA() << "\n";
                 }
 
                 else if(UserInput == 3){
-                    //
+                    
                 }
 
                 else{
@@ -110,10 +187,12 @@ int main(){
                 cout << "9. Sort Students by Grades \n";
                 cout << "Enter: ";
                 cin >> UserInput;
+                
 
 
                 if(UserInput == 1){
                     cout << "You will be redirected to the main login CLI now, goodbye \n";
+                    AccessGranted = ' ';
                     main(); //calls the main method, recursive. Thus, the main method will start from the top all over again. 
                     break; //If we truly want to start all we need to make sure we leave this while loop so the def of it doesnt appear again. 
                 }
@@ -162,22 +241,34 @@ int main(){
         }
 }
 
-void Append(){ //you will be writing to two files in this method so use ofstream
+void Append(){ //you will be writing to two files in this method so use ofstream. But, in order to avoid duplicate Username (StudentID) for student make sure we read through the file.
     string Text;
-    string UN; //local Username of type string, we've already declared a gloabal var so dup is not allowed. Remember, for user Student, Username == ID
+    string WordFromLine;
+    string UN; //local variable; Username of type string, we've already declared a gloabal var so dup is not allowed. Remember, for user Student, Username == StudentID
     string PW; //same as UN
     string StudentName; //we can re-use StudentName as it's a local varaible
+    bool Proceed;
 
     cout << "Enter your name: ";
     cin >> StudentName;
     cout << "Enter your Username, this will also be your Student ID (WSU FORMATE: xy####): ";
     cin >> UN;
+    ifstream File("UserCreds");
+    while(getline(File, Text)){
+        istringstream iss(Text);
+        while(iss >> WordFromLine){
+            while(WordFromLine == UN){
+                cout << "ERROR! This Username (StudentID) already exsists, try another one \n";
+                cout << "Enter your Username, this will also be your Student ID (WSU FORMATE: xy####): ";
+                cin >> UN;
+            }
+        }
+    }
     cout << "Enter your Password: ";
     cin >> PW;
 
     ofstream FileObject("UserCreds.txt", ios::app); //Add the user Student to the File/database that contains user creds
 
-    FileObject << "\n";
     FileObject << "\n";
     FileObject << "Type: Student" << "\n";
     FileObject << "Username: " << UN << "\n";
@@ -190,6 +281,8 @@ void Append(){ //you will be writing to two files in this method so use ofstream
     FileObject2 << UN << "\n";
     FileObject2 << StudentName << "\n"; 
     FileObject2 << 0 << "\n";
+
+    FileObject2.close();
 
 }
 

@@ -13,7 +13,7 @@ int UserInput;
 char AccessGranted;
 
 void Append(); //Inorder to register new students, we must add them into our databases (the two .txt files, the for the student info database by default the grades will be zero)
-string LogIn();
+string LogIn(); //This method verifies that the user exsists and is valid by reading the data from the text file and comparing it to the user input of the global variables, Username and Password
 
 class Admin{ // I will define Admin methods after int main();
     public: //access specifier
@@ -82,11 +82,17 @@ void Student::MyGrades(){
         }
 
         if(Text == Username){
+            cout << "Found";
             Proceed = 1;
             continue;
         }
 
         if(Proceed == 1){
+            Proceed = 2;
+            continue;
+        }
+
+        if(Proceed == 2){
             istringstream iss(Text);
             while(iss >> NumberFromLine){
                 GradesFromFile.push_back(NumberFromLine);
@@ -163,7 +169,7 @@ int main(){
                 }
 
                 else if(UserInput == 3){
-                    
+                    StudentObject.MyGrades();
                 }
 
                 else{
